@@ -40,7 +40,8 @@ import coil.compose.AsyncImage
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    onNavigateToRegister: () -> Unit
 ) {
     val state = viewModel.state
     var showForgotPasswordDialog by rememberSaveable { mutableStateOf(false) }
@@ -125,31 +126,19 @@ fun LoginScreen(
                     )
 
                     CustomTextField(
-                        value = state.customerCode,
-                        onValueChange = { viewModel.onEvent(LoginEvent.CustomerCodeChanged(it)) },
-                        label = "Müşteri Kodu",
-                        isError = state.customerCodeError != null,
-                        errorMessage = state.customerCodeError,
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Müşteri Kodu"
-                            )
-                        }
+                        value = state.email,
+                        onValueChange = { viewModel.onEvent(LoginEvent.EmailChanged(it)) },
+                        label = "E-posta",
+                        error = state.emailError,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     PasswordTextField(
                         value = state.password,
                         onValueChange = { viewModel.onEvent(LoginEvent.PasswordChanged(it)) },
                         label = "Şifre",
-                        isError = state.passwordError != null,
-                        errorMessage = state.passwordError,
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Şifre"
-                            )
-                        }
+                        error = state.passwordError,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     CustomButton(
@@ -195,6 +184,15 @@ fun LoginScreen(
                             .padding(16.dp)
                     )
                 }
+            }
+
+            Button(
+                onClick = { onNavigateToRegister() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(text = "Yeni Hesap Oluştur")
             }
         }
     }
