@@ -17,7 +17,8 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
-    error: String? = null
+    error: String? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     Column(modifier = modifier) {
         Text(
@@ -29,11 +30,16 @@ fun CustomTextField(
             value = value,
             onValueChange = onValueChange,
             isError = error != null,
+            keyboardOptions = keyboardOptions,
             modifier = Modifier.fillMaxWidth()
         )
-        if (error != null) {
+        AnimatedVisibility(
+            visible = error != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
             Text(
-                text = error,
+                text = error ?: "",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 4.dp)

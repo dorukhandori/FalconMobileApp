@@ -22,6 +22,10 @@ import com.example.b2becommerce.presentation.common.components.CustomButton
 import com.example.b2becommerce.util.Constants.TURKISH_CITIES
 import androidx.compose.foundation.lazy.grid.*
 import com.example.b2becommerce.presentation.common.components.CustomDropdownMenu
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberSnackbarHostState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +35,7 @@ fun RegisterScreen(
 ) {
     val state = viewModel.state
     val scrollState = rememberScrollState()
+    val snackbarHostState = rememberSnackbarHostState()
     var expanded by remember { mutableStateOf(false) }
     var cityExpanded by remember { mutableStateOf(false) }
     val customerTypes = listOf("KURUMSAL", "BİREYSEL", "GERÇEK KİŞİ")
@@ -50,6 +55,12 @@ fun RegisterScreen(
         }
     }
 
+    LaunchedEffect(state.error) {
+        state.error?.let { errorMessage ->
+            snackbarHostState.showSnackbar(errorMessage)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,6 +73,9 @@ fun RegisterScreen(
             text = "Yeni Üye Formu",
             style = MaterialTheme.typography.headlineMedium
         )
+
+        // Snackbar Host
+        SnackbarHost(hostState = snackbarHostState)
 
         // Müşteri Tipi
         CustomDropdownMenu(
@@ -241,23 +255,6 @@ fun RegisterScreen(
             ) {
                 Text("Girişe Dön")
             }
-        }
-
-        // Hata ve başarı mesajları
-        if (state.error != null) {
-            Text(
-                text = state.error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        if (state.successMessage != null) {
-            Text(
-                text = state.successMessage,
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
     }
 }

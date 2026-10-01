@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.b2becommerce.data.remote.model.RegisterFormRequest
 import com.example.b2becommerce.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -142,16 +143,36 @@ class RegisterViewModel @Inject constructor(
             addressError = addressError
         )
 
+        // 3 saniye sonra form hatalarını temizle
+        if (fullNameError != null || emailError != null || 
+            phoneError != null || addressError != null) {
+            viewModelScope.launch {
+                delay(3000)
+                state = state.copy(
+                    fullNameError = null,
+                    emailError = null,
+                    phoneError = null,
+                    addressError = null
+                )
+            }
+        }
+
         return fullNameError == null && emailError == null && 
                phoneError == null && addressError == null
     }
 
     private fun register() {
         viewModelScope.launch {
-            state = state.copy(isLoading = true)
             try {
+                state = state.copy(isLoading = true)
+                val customerTypeInt = when (state.customerType) {
+                    "KURUMSAL" -> 0
+                    "BİREYSEL" -> 1
+                    "GERÇEK KİŞİ" -> 2
+                    else -> throw IllegalArgumentException("Geçersiz müşteri tipi")
+                }
                 val request = RegisterFormRequest(
-                    customerType = state.customerType,
+                    customerType = customerTypeInt,
                     fullName = state.fullName,
                     email = state.email,
                     phone = state.phone,
@@ -179,21 +200,29 @@ class RegisterViewModel @Inject constructor(
                     .onSuccess {
                         state = state.copy(
                             isLoading = false,
-                            successMessage = "Kayıt başarıyla oluşturuldu"
+                            successMessage = "Kayıt başarılı",
+                            error = null
                         )
                     }
                     .onFailure { e ->
+                        val errorMessage = e.message ?: "Kayıt işlemi başarısız oldu"
                         state = state.copy(
                             isLoading = false,
-                            error = e.message ?: "Kayıt oluşturulamadı",
-                            successMessage = null
+                            error = errorMessage
                         )
+                        // Hata mesajını 3 saniye sonra temizle
+                        delay(3000)
+                        state = state.copy(error = null)
                     }
             } catch (e: Exception) {
+                val errorMessage = e.message ?: "Kayıt yapılırken bir hata oluştu"
                 state = state.copy(
                     isLoading = false,
-                    error = e.message ?: "Bir hata oluştu"
+                    error = errorMessage
                 )
+                // Hata mesajını 3 saniye sonra temizle
+                delay(3000)
+                state = state.copy(error = null)
             }
         }
     }
@@ -234,5 +263,18 @@ class RegisterViewModel @Inject constructor(
 
     fun updateFilePath4(path: String?) {
         _filePath4.value = path
+    }
+
+    private fun handleError(exception: Throwable) {
+        state = state.copy(
+            isLoading = false,
+            error = exception.message ?: "Bilinmeyen bir hata oluştu"
+        )
+        
+        // 3 saniye sonra hata mesajını temizle
+        viewModelScope.launch {
+            delay(3000)
+            state = state.copy(error = null)
+        }
     }
 } 

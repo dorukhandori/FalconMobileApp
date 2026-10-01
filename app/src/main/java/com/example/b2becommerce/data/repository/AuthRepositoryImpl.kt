@@ -1,11 +1,19 @@
 package com.example.b2becommerce.data.repository
 
 import android.content.SharedPreferences
+import com.example.b2becommerce.data.model.LoginResponse
+import com.example.b2becommerce.data.model.UserData
 import com.example.b2becommerce.data.remote.api.ApiService
 import com.example.b2becommerce.data.remote.dto.LoginRequest
+import com.example.b2becommerce.data.remote.model.RegisterFormRequest
+import com.example.b2becommerce.data.remote.model.BaseResponse
+import com.example.b2becommerce.data.remote.model.ResetPasswordRequest
+import com.example.b2becommerce.data.remote.model.ResetPasswordResponse
 import com.example.b2becommerce.domain.model.User
 import com.example.b2becommerce.domain.repository.AuthRepository
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 class AuthRepositoryImpl @Inject constructor(
     private val api: ApiService,
@@ -13,40 +21,45 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun login(customerCode: String, password: String): User {
-        try {
-            val response = api.login(LoginRequest(customerCode, password))
-            
-            if (!response.isSuccessful) {
-                throw Exception(response.errorBody()?.string() ?: "Giriş başarısız")
-            }
-
-            val loginResponse = response.body() ?: throw Exception("Yanıt alınamadı")
-            
+        val request = LoginRequest(customerCode = customerCode, password = password)
+        val response = api.login(request)
+        if (response.isSuccessful) {
+            val loginResponse: LoginResponse? = response.body()
             // Token'ı kaydet
-            saveAuthToken(loginResponse.token)
-
-            // User modelini dönüştür ve döndür
-            return with(loginResponse.user) {
-                User(
-                    id = id.toString(),
-                    email = email,
-                    name = name,
-                    role = role
-                )
+            loginResponse?.token?.let { token ->
+                saveAuthToken(token)
             }
-        } catch (e: Exception) {
-            throw Exception(e.message ?: "Giriş yapılırken bir hata oluştu")
+            // User modelini dönüştür ve döndür
+            return User(
+                id = loginResponse?.userId ?: "",
+                email = "", // Email bilgisi yoksa boş bırakın
+                name = "", // Name bilgisi yoksa boş bırakın
+                customerCode = customerCode,
+                role = "USER"
+            )
+        } else {
+            throw Exception(response.errorBody()?.string() ?: "Giriş başarısız")
         }
     }
 
-    override suspend fun register(
-        email: String,
-        password: String,
-        name: String,
-        companyName: String
-    ): Boolean {
-        // Register implementasyonu
-        TODO("Not yet implemented")
+    override suspend fun register(request: RegisterFormRequest): Result<BaseResponse> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response = api.register(request)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null) {
+                        Result.success(body)
+                    } else {
+                        Result.failure(Exception("Yanıt alınamadı"))
+                    }
+                } else {
+                    Result.failure(Exception(response.errorBody()?.string() ?: "Kayıt başarısız"))
+                }
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun saveAuthToken(token: String) {
@@ -61,15 +74,28 @@ class AuthRepositoryImpl @Inject constructor(
         prefs.edit().remove(AUTH_TOKEN_KEY).apply()
     }
 
-    override suspend fun resetPassword(email: String) {
-        try {
-            val response = api.resetPassword(email)
-            if (!response.isSuccessful) {
-                throw Exception(response.errorBody()?.string() ?: "Şifre sıfırlama başarısız")
+    override suspend fun resetPassword(request: ResetPasswordRequest): Result<ResetPasswordResponse> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response = api.resetPassword(request)
+                if (response.statusCode == 200) {
+                    Result.success(response)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             }
         } catch (e: Exception) {
-            throw Exception("Şifre sıfırlama işlemi başarısız oldu: ${e.localizedMessage}")
+            Result.failure(e)
         }
+    }
+
+    fun getUserData(userId: String): UserData {
+        // Geçici bir UserData nesnesi döndürün
+        return UserData(
+            id = userId,
+            name = "Default Name", // Varsayılan bir isim
+            email = "default@example.com" // Varsayılan bir e-posta
+        )
     }
 
     companion object {

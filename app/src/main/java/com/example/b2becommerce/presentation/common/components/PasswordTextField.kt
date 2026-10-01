@@ -1,5 +1,6 @@
 package com.example.b2becommerce.presentation.common.components
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -7,8 +8,11 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,12 +36,25 @@ fun PasswordTextField(
             value = value,
             onValueChange = onValueChange,
             isError = error != null,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) 
+                VisualTransformation.None 
+            else 
+                PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Şifreyi Gizle" else "Şifreyi Göster"
+                        imageVector = if (passwordVisible) 
+                            Icons.Default.Visibility 
+                        else 
+                            Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) 
+                            "Şifreyi Gizle" 
+                        else 
+                            "Şifreyi Göster"
                     )
                 }
             },

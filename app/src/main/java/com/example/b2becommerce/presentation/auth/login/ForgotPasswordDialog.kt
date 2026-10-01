@@ -10,80 +10,40 @@ import androidx.compose.ui.unit.dp
 import android.util.Patterns
 import androidx.compose.foundation.text.KeyboardOptions
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordDialog(
     onDismiss: () -> Unit,
     onSubmit: (String) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
-    var isEmailError by remember { mutableStateOf(false) }
-    var emailErrorMessage by remember { mutableStateOf("") }
-
-    fun validateEmail(): Boolean {
-        return if (email.isEmpty()) {
-            isEmailError = true
-            emailErrorMessage = "E-posta adresi boş olamaz"
-            false
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            isEmailError = true
-            emailErrorMessage = "Geçerli bir e-posta adresi giriniz"
-            false
-        } else {
-            isEmailError = false
-            emailErrorMessage = ""
-            true
-        }
-    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = "Şifre Sıfırlama",
-                style = MaterialTheme.typography.titleLarge
-            )
+            Text(text = "Şifre Sıfırlama")
         },
         text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            Column {
                 Text(
-                    text = "Şifrenizi sıfırlamak için e-posta adresinizi giriniz.",
+                    text = "Şifre sıfırlama bağlantısı için e-posta adresinizi girin",
                     style = MaterialTheme.typography.bodyMedium
                 )
-
+                Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = email,
-                    onValueChange = {
-                        email = it
-                        if (isEmailError) validateEmail()
-                    },
-                    label = { Text("E-posta Adresi") },
+                    onValueChange = { email = it },
+                    label = { Text("E-posta") },
                     singleLine = true,
-                    isError = isEmailError,
-                    supportingText = if (isEmailError) {
-                        { Text(emailErrorMessage) }
-                    } else null,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    )
                 )
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    if (validateEmail()) {
-                        onSubmit(email)
-                        onDismiss()
-                    }
-                }
-            ) {
+            TextButton(onClick = { onSubmit(email) }) {
                 Text("Gönder")
             }
         },

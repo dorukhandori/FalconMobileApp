@@ -17,4 +17,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="Epic Soft Logo"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Kullanıcı adı girişi -->
+        <EditText
+            android:id="@+id/usernameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Kullanıcı Adı"
+            style="@style/LoginScreenStyle"/>
+
+        <!-- E-posta girişi -->
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-posta"
+            style="@style/LoginScreenStyle"/>
+
+        <!-- Giriş butonu -->
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Giriş Yap"
+            android:onClick="onLoginButtonClick"/>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout> 

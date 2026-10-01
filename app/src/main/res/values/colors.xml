@@ -13,4 +13,5 @@
     <color name="surface_gray">#FFFFFF</color>
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
+    <color name="transparent">#00000000</color>
 </resources>

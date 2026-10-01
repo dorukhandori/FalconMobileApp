@@ -23,6 +23,10 @@ object AppModule {
     
     @Provides
     @Singleton
+    fun provideContext(@ApplicationContext context: Context): Context = context
+
+    @Provides
+    @Singleton
     fun provideSharedPreferences(
         @ApplicationContext context: Context
     ): SharedPreferences {
@@ -38,8 +42,9 @@ object AppModule {
 
         val authInterceptor = Interceptor { chain ->
             val request = chain.request().newBuilder()
-                .addHeader("Accept", "application/json")
+                .addHeader("Accept", "*/*")
                 .addHeader("Content-Type", "application/json")
+                .addHeader("xcmzkey", "NX3qKA25bqwquuFdOcckvNdWkZYIy0RF4tNw+hwgYS43jsm07rwosdpO0Meh1I/gzVXt580rIOGdYFMBDLwo3vBfFxeuOPvu6x0Fa+n2s/XPcHVaCiEnoL0mdN3pCOPLv4UnPBJZGtZdEYwo1//0qHdif7TcnvrWUCyGtJLUTR/eOLo4bY64d5tebRU/wovQ")
                 .build()
             chain.proceed(request)
         }

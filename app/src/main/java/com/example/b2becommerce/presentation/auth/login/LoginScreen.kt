@@ -35,6 +35,9 @@ import com.example.b2becommerce.presentation.common.components.CustomTextField
 import com.example.b2becommerce.presentation.common.components.PasswordTextField
 import com.example.b2becommerce.presentation.navigation.Screen
 import coil.compose.AsyncImage
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardOptions
 
 @OptIn(ExperimentalMaterial3Api::class)  // Material3 experimental API için
 @Composable
@@ -125,11 +128,12 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    // Tek giriş alanı
                     CustomTextField(
-                        value = state.email,
-                        onValueChange = { viewModel.onEvent(LoginEvent.EmailChanged(it)) },
-                        label = "E-posta",
-                        error = state.emailError,
+                        value = state.emailOrUsername, // Yeni alan
+                        onValueChange = { viewModel.onEvent(LoginEvent.EmailOrUsernameChanged(it)) },
+                        label = "E-posta veya Kullanıcı Adı", // Label güncellendi
+                        error = state.emailOrUsernameError, // Hata durumu
                         modifier = Modifier.fillMaxWidth()
                     )
 
